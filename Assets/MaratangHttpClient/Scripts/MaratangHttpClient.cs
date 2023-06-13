@@ -1,127 +1,167 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-public class MaratangHttpClient
+
+namespace MaratangHttp
 {
-    private MonoBehaviour monobehaviour;
+	public class MaratangHttpClient
+	{
+		private static MonoBehaviour _monobehaviour;
 
-    public MaratangHttpClient(MonoBehaviour monobehaviour)
-    {
-        this.monobehaviour = monobehaviour;
-    }
+		private MaratangHttpClient(MonoBehaviour monobehaviour)
+		{
+			_monobehaviour = monobehaviour;
+		}
 
-    /*private static MaratangHttpClient _instance = null;
+		private static MaratangHttpClient _instance = null;
 
-    public static MaratangHttpClient GetInstance(MonoBehaviour monoBehaviour)
-    {
-        if (_instance == null) _instance = new MaratangHttpClient(monoBehaviour);
-        return _instance;
-    }*/
+		public static MaratangHttpClient GetInstance(MonoBehaviour monoBehaviour)
+		{
+			if (_instance == null) _instance = new MaratangHttpClient(monoBehaviour);
+			else _monobehaviour = monoBehaviour;
 
-    public void GetString(string url,
-                          Action<string> onSuccess,
-                          Action<string> onFailure,
-                          Action<string> onError)
-    {
-        monobehaviour.StartCoroutine(
-            RequestGetString(url, onSuccess, onFailure, onError)
-        );
-    }
+			return _instance;
+		}
 
-    IEnumerator RequestGetString(string url,
-                                 Action<string> onSuccess,
-                                 Action<string> onFailure,
-                                 Action<string> onError)
-    {
-        UnityWebRequest request = UnityWebRequest.Get(url);
-        yield return request.SendWebRequest();
+		public void GetString(Request request,
+							  Action<Success<string>> onSuccess,
+							  Action<Failure> onFailure,
+							  Action<string> onError)
+		{
+			_monobehaviour.StartCoroutine(
+				RequestGetString(request, onSuccess, onFailure, onError)
+			);
+		}
 
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            onSuccess.Invoke(request.downloadHandler.text);
-        }
-        else if (request.result == UnityWebRequest.Result.ConnectionError)
-        {
-            onFailure.Invoke(request.error);
-        }
-        else
-        {
-            onError.Invoke(request.error);
-        }
-    }
+		IEnumerator RequestGetString(Request request,
+									 Action<Success<string>> onSuccess,
+									 Action<Failure> onFailure,
+									 Action<string> onError)
+		{
+			UnityWebRequest request = UnityWebRequest.Get(url);
+			yield return request.SendWebRequest();
 
-    public void GetJsonObject<T>(string url, 
-                                 Action<T> onSuccess,
-                                 Action<string> onFailure,
-                                 Action<string> onError)
-    {
-        monobehaviour.StartCoroutine(
-            RequestGetJson(url, onSuccess, onFailure, onError)
-        );
-    }
+			if (request.result == UnityWebRequest.Result.Success)
+			{
+				Dictionary<string, string> headers = request.GetResponseHeaders();
+				string body = request.downloadHandler.text;
 
-    IEnumerator RequestGetJson<T>(string url, 
-                              Action<T> onSuccess,
-                              Action<string> onFailure,
-                              Action<string> onError)
-    {
-        UnityWebRequest request = UnityWebRequest.Get(url);
-        yield return request.SendWebRequest();
+				Success<string> success = new Success<string>(headers, body);
+				onSuccess.Invoke(success);
+			}
+			else if (request.result == UnityWebRequest.Result.ConnectionError)
+			{
+				Failure failure = Failure.Create(request);
+				onFailure.Invoke(failure);
+			}
+			else
+			{
+				string error = request.error;
+				onError.Invoke(error);
+			}
+		}
 
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            try
-            {
-                T jsonObject = JsonUtility.FromJson<T>(request.downloadHandler.text);
-                onSuccess.Invoke(jsonObject);
-            }
-            catch(Exception e)
-            {
-                onError.Invoke(e.Message);
-            }
-        }
-        else if (request.result == UnityWebRequest.Result.ConnectionError)
-        {
-            onFailure.Invoke(request.error);
-        }
-        else
-        {
-            onError.Invoke(request.error);
-        }
-    }
+		public void GetJsonObject<T>(string url,
+									 Action<Success<T>> onSuccess,
+									 Action<Failure> onFailure,
+									 Action<string> onError)
+		{
+			_monobehaviour.StartCoroutine(
+				RequestGetJson(url, onSuccess, onFailure, onError)
+			);
+		}
 
-    public void GetTexture(string url,
-                           Action<Texture2D> onSuccess,
-                           Action<string> onFailure,
-                           Action<string> onError)
-    {
-        monobehaviour.StartCoroutine(
-            RequestTexture(url, onSuccess, onFailure, onError)
-        );
-    }
+		IEnumerator RequestGetJson<T>(string url,
+									  Action<Success<T>> onSuccess,
+									  Action<Failure> onFailure,
+									  Action<string> onError)
+		{
+			UnityWebRequest request = UnityWebRequest.Get(url);
+			yield return request.SendWebRequest();
 
-    IEnumerator RequestTexture(string url,
-                               Action<Texture2D> onSuccess,
-                               Action<string> onFailure,
-                               Action<string> onError)
-    {
-        UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
-        yield return request.SendWebRequest();
+			if (request.result == UnityWebRequest.Result.Success)
+			{
+				try
+				{
+					Dictionary<string, string> headers = request.GetResponseHeaders();
 
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            Texture2D texture =
-                ((DownloadHandlerTexture)request.downloadHandler).texture;
-            onSuccess.Invoke(texture);
-        }
-        else if (request.result == UnityWebRequest.Result.ConnectionError)
-        {
-            onFailure.Invoke(request.error);
-        }
-        else
-        {
-            onError.Invoke(request.error);
-        }
-    }
+					string originalJson = request.downloadHandler.text;
+					T body = default;
+
+					// if the JSON is a nameless array
+					if (originalJson.StartsWith("["))
+					{
+						string wrappedJson = "{\"array\":" + originalJson + "}";
+						Debug.Log("wrappedJson: " + wrappedJson);
+
+						JsonArrayWrapper<T> wrappedObject = 
+							JsonUtility.FromJson<JsonArrayWrapper<T>>(wrappedJson);
+
+						body = wrappedObject.Array;
+					}
+					else
+					{
+						body = JsonUtility.FromJson<T>(originalJson);
+					}
+
+					Success<T> success = new Success<T>(headers, body);
+					onSuccess.Invoke(success);
+				}
+				catch (Exception e)
+				{
+					onError.Invoke(e.Message);
+				}
+			}
+			else if (request.result == UnityWebRequest.Result.ConnectionError)
+			{
+				Failure failure = Failure.Create(request);
+				onFailure.Invoke(failure);
+			}
+			else
+			{
+				onError.Invoke(request.error);
+			}
+		}
+
+		public void GetTexture(string url,
+							   Action<Success<Texture2D>> onSuccess,
+							   Action<Failure> onFailure,
+							   Action<string> onError)
+		{
+			_monobehaviour.StartCoroutine(
+				RequestTexture(url, onSuccess, onFailure, onError)
+			);
+		}
+
+		IEnumerator RequestTexture(string url,
+								   Action<Success<Texture2D>> onSuccess,
+								   Action<Failure> onFailure,
+								   Action<string> onError)
+		{
+			UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
+			yield return request.SendWebRequest();
+
+			if (request.result == UnityWebRequest.Result.Success)
+			{
+				Dictionary<string, string> headers = request.GetResponseHeaders();
+
+				Texture2D body =
+						((DownloadHandlerTexture)request.downloadHandler).texture;
+
+				Success<Texture2D> success = new Success<Texture2D>(headers, body);
+				onSuccess.Invoke(success);
+			}
+			else if (request.result == UnityWebRequest.Result.ConnectionError)
+			{
+				Failure failure = Failure.Create(request);
+				onFailure.Invoke(failure);
+			}
+			else
+			{
+				onError.Invoke(request.error);
+			}
+		}
+	}
 }

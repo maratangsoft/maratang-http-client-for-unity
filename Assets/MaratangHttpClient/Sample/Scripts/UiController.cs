@@ -1,40 +1,30 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using MaratangHttp;
 
 public class UiController : MonoBehaviour
 {
-    public Text idText;
-    public Text nameText;
-    public Text emailText;
-    public RawImage profileImage;
+    public GameObject verticalLayout;
+    public GameObject itemView;
 
     MaratangHttpClient httpClient = null;
-    string testUrl = "https://httpbin.org/anything?name=aaa";
-    string userInfoUrl = "https://httpbin.org/anything?name=aaa";
+
+	// example API documentation: https://pureani.tistory.com/4997
+    // There's no need to have an authorization key to use this API.
+	string url = "https://api.manana.kr/karaoke/tj.json";
 
     private void Start()
     {
-        httpClient = new MaratangHttpClient(this);
-        ConnectionTest();
+        httpClient = MaratangHttpClient.GetInstance(this);
     }
 
-    private void ConnectionTest()
+    public void FetchNewSongs()
     {
-        httpClient.GetString(testUrl, success => {
-            Debug.Log(success);
-        }, failure => {
-            Debug.Log(failure);
-        }, error => {
-            Debug.Log(error);
-        });
-    }
-
-    public void FetchUserInfo()
-    {
-        httpClient.GetJsonObject<UserInfo>(userInfoUrl, success => {
-            FetchProfileImage(success.ProfileImageUrl, success);
+        // 불러오려는 데이터가 JSON 배열입니다.
+        // 유니티 JsonUtility는 JSON 배열을 파싱하지 못하므로
+        // 리턴받으려는 데이터 타입(배열 안에 있는 객체)을 JsonArrayWrapper로 감싸서 넘겨주세요.
+        httpClient.GetJsonObject<Song[]>(url, success => {
+            Debug.Log(success.Headers.ToString());
+            UpdateUi(success.Body);
 
         }, failure => { 
             Debug.Log(failure); 
@@ -43,23 +33,17 @@ public class UiController : MonoBehaviour
         });
     }
 
-    private void FetchProfileImage(string imageUrl, UserInfo userInfo)
+    private void UpdateUi(Song[] newSongs)
     {
-        httpClient.GetTexture(imageUrl, success => {
-            UpdateUi(userInfo, success);
+        foreach (Transform child in verticalLayout.transform)
+        {
+            Destroy(child.gameObject);
+        }
 
-        }, failure => { 
-            Debug.Log(failure); 
-        }, error => { 
-            Debug.Log(error); 
-        });
-    }
-
-    private void UpdateUi(UserInfo userInfo, Texture2D userTexture)
-    {
-        idText.text = userInfo.Id.ToString();
-        nameText.text = userInfo.Name;
-        emailText.text = userInfo.Email;
-        profileImage.texture = userTexture;
+        foreach (Song song in newSongs) 
+        {
+            GameObject go = Instantiate(itemView, verticalLayout.transform);
+            go.GetComponent<ItemView>().Bind(song);
+        }
     }
 }
