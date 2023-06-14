@@ -51,11 +51,10 @@ namespace MaratangHttp
 					string originalJson = request.downloadHandler.text;
 					T body = default;
 
-					// if the JSON is a nameless array
+					// if the JSON is a top-level array
 					if (originalJson.StartsWith("["))
 					{
 						string wrappedJson = "{\"array\":" + originalJson + "}";
-						Debug.Log("wrappedJson: " + wrappedJson);
 
 						JsonArrayWrapper<T> wrappedObject =
 							JsonUtility.FromJson<JsonArrayWrapper<T>>(wrappedJson);

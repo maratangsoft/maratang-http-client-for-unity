@@ -39,7 +39,8 @@ public class PictureUiController : MonoBehaviour
 			}
 
 		}, failure => {
-			Debug.Log(failure);
+			Debug.Log(failure.Code);
+			Debug.Log(failure.Message);
 		}, error => {
 			Debug.Log(error);
 		});
@@ -63,7 +64,8 @@ public class PictureUiController : MonoBehaviour
 			}
 
 		}, failure => {
-			Debug.Log(failure);
+			Debug.Log(failure.Code);
+			Debug.Log(failure.Message);
 		}, error => {
 			Debug.Log(error);
 		});

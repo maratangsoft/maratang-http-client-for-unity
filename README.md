@@ -34,7 +34,7 @@ UnityWebRequest에게 HTTP통신을 실행하도록 하고, 응답 데이터로 
 * Unity JsonUtility
 
 ## Installation
-1. [유니티패키지](https://github.com/maratangsoft/maratang-http-client-for-unity/blob/master/maratang-http-client.unitypackage) 파일 다운로드
+1. [maratang-http-client.unitypackage](https://github.com/maratangsoft/maratang-http-client-for-unity/blob/master/maratang-http-client.unitypackage) 파일 다운로드
 2. 에디터 상단 메뉴의 Assets > Import Package > Custom Package 클릭
 3. 다운받은 유니티패키지 Import
 
@@ -89,7 +89,7 @@ httpClient.SendRequestForString(request, success => {
 
 * JSON response
 ```csharp
-// T: 역직렬화할 클래스
+// T: 역직렬화할 클래스 혹은 행렬
 httpClient.SendRequestForJson<T>(request, success => {
     // Dictionary<string, string> Success.Headers
     // T Success.Body
