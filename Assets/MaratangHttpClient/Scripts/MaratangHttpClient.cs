@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -25,22 +26,21 @@ namespace MaratangHttp
 			return _instance;
 		}
 
-		public void GetString(Request request,
-							  Action<Success<string>> onSuccess,
-							  Action<Failure> onFailure,
-							  Action<string> onError)
+		public void SendRequestForString(UnityWebRequest request,
+						 Action<Success<string>> onSuccess,
+						 Action<Failure> onFailure,
+						 Action<string> onError)
 		{
 			_monobehaviour.StartCoroutine(
-				RequestGetString(request, onSuccess, onFailure, onError)
+				ResponseString(request, onSuccess, onFailure, onError)
 			);
 		}
 
-		IEnumerator RequestGetString(Request request,
+		IEnumerator ResponseString(UnityWebRequest request,
 									 Action<Success<string>> onSuccess,
 									 Action<Failure> onFailure,
 									 Action<string> onError)
 		{
-			UnityWebRequest request = UnityWebRequest.Get(url);
 			yield return request.SendWebRequest();
 
 			if (request.result == UnityWebRequest.Result.Success)
@@ -63,22 +63,21 @@ namespace MaratangHttp
 			}
 		}
 
-		public void GetJsonObject<T>(string url,
-									 Action<Success<T>> onSuccess,
-									 Action<Failure> onFailure,
-									 Action<string> onError)
+		public void SendRequestForJson<T>(UnityWebRequest request,
+							Action<Success<T>> onSuccess,
+							Action<Failure> onFailure,
+							Action<string> onError)
 		{
 			_monobehaviour.StartCoroutine(
-				RequestGetJson(url, onSuccess, onFailure, onError)
+				RequestGetJson(request, onSuccess, onFailure, onError)
 			);
 		}
 
-		IEnumerator RequestGetJson<T>(string url,
+		IEnumerator RequestGetJson<T>(UnityWebRequest request,
 									  Action<Success<T>> onSuccess,
 									  Action<Failure> onFailure,
 									  Action<string> onError)
 		{
-			UnityWebRequest request = UnityWebRequest.Get(url);
 			yield return request.SendWebRequest();
 
 			if (request.result == UnityWebRequest.Result.Success)
@@ -125,22 +124,21 @@ namespace MaratangHttp
 			}
 		}
 
-		public void GetTexture(string url,
-							   Action<Success<Texture2D>> onSuccess,
-							   Action<Failure> onFailure,
-							   Action<string> onError)
+		public void SendRequestForTexture(UnityWebRequest request,
+						 Action<Success<Texture2D>> onSuccess,
+						 Action<Failure> onFailure,
+						 Action<string> onError)
 		{
 			_monobehaviour.StartCoroutine(
-				RequestTexture(url, onSuccess, onFailure, onError)
+				RequestTexture(request, onSuccess, onFailure, onError)
 			);
 		}
 
-		IEnumerator RequestTexture(string url,
+		IEnumerator RequestTexture(UnityWebRequest request,
 								   Action<Success<Texture2D>> onSuccess,
 								   Action<Failure> onFailure,
 								   Action<string> onError)
 		{
-			UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
 			yield return request.SendWebRequest();
 
 			if (request.result == UnityWebRequest.Result.Success)

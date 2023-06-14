@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
+﻿using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -24,11 +20,17 @@ namespace MaratangHttp
 			headers = new Dictionary<string, string>();
 		}
 
-		public RequestBuilder SetHeader(string key, string value)
+		public RequestBuilder AddHeader(string key, string value)
 		{
 			headers.Add(key, value);
 			return this;
 		}
+		public RequestBuilder AddPath(string path)
+		{
+			urlBuilder.Append(path);
+			return this;
+		}
+
 		public RequestBuilder AddUrlParameter(string key, string value)
 		{
 			if (parameterCount == 0) urlBuilder.Append("?");
@@ -61,6 +63,19 @@ namespace MaratangHttp
 		{
 			string url = urlBuilder.ToString();
 			UnityWebRequest request = UnityWebRequest.Post(url, postData);
+
+			foreach (KeyValuePair<string, string> kvp in headers)
+			{
+				request.SetRequestHeader(kvp.Key, kvp.Value);
+			}
+
+			return request;
+		}
+
+		public UnityWebRequest BuildTexture()
+		{
+			string url = urlBuilder.ToString();
+			UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
 
 			foreach (KeyValuePair<string, string> kvp in headers)
 			{
