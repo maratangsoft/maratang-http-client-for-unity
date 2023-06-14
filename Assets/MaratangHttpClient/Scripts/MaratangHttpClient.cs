@@ -63,6 +63,7 @@ namespace MaratangHttp
 			}
 		}
 
+
 		public void SendRequestForJson<T>(UnityWebRequest request,
 							Action<Success<T>> onSuccess,
 							Action<Failure> onFailure,

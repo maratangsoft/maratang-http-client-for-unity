@@ -34,7 +34,7 @@ public class PictureUiController : MonoBehaviour
             // 헤더값 확인을 위한 로그
 			foreach (KeyValuePair<string, string> kvp in success.Headers)
 			{
-				Debug.Log("header// " + kvp.Key + ": " + kvp.Value);
+				Debug.Log(kvp.Key + ": " + kvp.Value);
 			}
 
 		}, failure => {

@@ -29,6 +29,11 @@ HTTP통신을 실행하고 응답을 받아오는 싱글턴 객체입니다. 내
 * Unity Coroutine
 * Unity JsonUtility
 
+## Installation
+1. [유니티패키지](https://github.com/maratangsoft/maratang-http-client-for-unity/blob/master/maratang-http-client.unitypackage) 파일 다운로드
+2. 에디터 상단 메뉴의 Assets > Import Package > Custom Package 클릭
+3. 다운받은 유니티패키지 Import
+
 ## Instructions
 ### 1. 클라이언트 초기화
 ```csharp
@@ -113,13 +118,13 @@ httpClient.SendRequestForTexture(request, success => {
 
 ## Sample
 ### GET JSON Array 씬
-BuildGET() + GetJson<T>()
+BuildGET() + GetJson<T>()<br>
 웹 API에서 노래방 신곡 리스트를 받아와 UI에 표시하는 예제입니다.
 
 [API 정보](https://pureani.tistory.com/4997)
 
 ### GET Picture 씬
-BuildTexture() + GetTexture()
+BuildTexture() + GetTexture()<br>
 이미지 사이트에서 특정 이미지를 받아와 UI에 표시하는 예제입니다.
 
 [예제 이미지](https://cdn.pixabay.com/photo/2023/05/05/11/07/sweet-7972193_1280.jpg)
