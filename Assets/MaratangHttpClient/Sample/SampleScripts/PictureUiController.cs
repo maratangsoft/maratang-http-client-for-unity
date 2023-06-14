@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using MaratangHttp;
 using UnityEngine.Networking;
-using JetBrains.Annotations;
 using System.Collections.Generic;
 
 public class PictureUiController : MonoBehaviour
@@ -18,7 +17,9 @@ public class PictureUiController : MonoBehaviour
 		client = MaratangHttpClient.GetInstance(this);
     }
 
-    public void OnFetchButtonClicked()
+	// 1. Coroutine 사용
+	// SendRequestForTexture()
+	public void OnFetchButtonClicked()
     {
         // GET 방식으로 이미지를 다운받기 위한 request 객체 만들기 
         UnityWebRequest request = new RequestBuilder(baseUrl)
@@ -44,7 +45,31 @@ public class PictureUiController : MonoBehaviour
 		});
     }
 
-    public void OnClearButtonClicked()
+	// 2. async / await 사용
+	// SendRequestForTextureAsync()
+	public void OnFetchAsyncButtonClicked()
+	{
+		UnityWebRequest request = new RequestBuilder(baseUrl)
+			.AddPath(path)
+			.BuildTexture();
+
+		client.SendRequestForTextureAsync(request, success => {
+			Texture2D downloadedPicture = success.Body;
+			rawImage.texture = downloadedPicture;
+
+			foreach (KeyValuePair<string, string> kvp in success.Headers)
+			{
+				Debug.Log(kvp.Key + ": " + kvp.Value);
+			}
+
+		}, failure => {
+			Debug.Log(failure);
+		}, error => {
+			Debug.Log(error);
+		});
+	}
+
+	public void OnClearButtonClicked()
     {
         rawImage.texture = null;
     }

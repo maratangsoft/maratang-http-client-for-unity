@@ -1,3 +1,4 @@
+## Overview
 유니티에서의 간단한 HTTP통신을 연습해 보고자 만들었습니다.<br>
 UnityWebRequest를 기반으로 각종 편의 기능들을 추가했습니다.<br>
 만드는 김에 에셋화시켜서 다른 프로젝트에서도 쓸 수 있도록 해봤습니다.<br>
@@ -6,7 +7,7 @@ UnityWebRequest를 기반으로 각종 편의 기능들을 추가했습니다.<b
 
 ## Features
 ### RequestBuilder
-UnityWebRequest 객체를 빌더 패턴으로 쉽게 생성할 수 있습니다.
+UnityWebRequest 객체를 빌더 패턴으로 쉽게 생성할 수 있게 해주는 클래스입니다.
 
 - AddHeader() : 커스텀 헤더 입력
 - AddPath() : 서버 주소 (base URL) 뒤에 붙을 경로 입력
@@ -17,14 +18,17 @@ UnityWebRequest 객체를 빌더 패턴으로 쉽게 생성할 수 있습니다.
 - BuileTexture() : GET방식으로 Texture2D 파일을 받아오기 위한 UnityWebRequest 객체를 리턴합니다.
 
 ### MaratangHttpClient
-HTTP통신을 실행하고 응답을 받아오는 싱글턴 객체입니다. 내부에서 코루틴으로 실행되므로 따로 비동기 처리를 하지 않아도 됩니다. 응답을 받아오는 콜백은 통신 상태에 따라 success(성공시), failure(네트워크 장애시), error(기타 에러시) 3가지로 분기됩니다.
+UnityWebRequest에게 HTTP통신을 실행하도록 하고, 응답 데이터로 추가적인 작업을 몇 가지 수행하는 싱글턴 클래스입니다. 내부에서 코루틴 혹은 async/await로 실행되므로 따로 비동기 처리를 하지 않아도 됩니다. 응답을 받아오는 콜백은 통신 상태에 따라 success(성공시), failure(네트워크 장애시), error(기타 에러시) 3가지로 분기됩니다.
 
 - GetInstance() : 클라이언트 인스턴스를 가져옵니다.
-- SendRequestForString() : UnityWebRequest 객체를 받아서 통신 후 응답받은 데이터를 문자열로 콜백합니다.
-- SendRequestForJson<T>() : UnityWebRequest 객체를 받아서 통신 후 응답받은 JSON 데이터를 T 객체로 파싱하여 콜백합니다.
-- SendRequestForTexture() : UnityWebRequest 객체를 받아서 통신 후 응답받은 이미지 데이터를 Texture2D 객체로 파싱하여 콜백합니다.
+- SendRequestForString() : UnityWebRequest 객체를 받아서 통신 후 응답받은 데이터를 문자열로 콜백합니다. 코루틴을 사용합니다.
+- SendRequestForStringAsync() : async/await를 사용하는 것 외엔 위와 동일합니다.
+- SendRequestForJson<T>() : UnityWebRequest 객체를 받아서 통신 후 응답받은 JSON 데이터를 T 객체로 파싱하여 콜백합니다. 코루틴을 사용합니다.
+- SendRequestForJsonAsync<T>() : async/await를 사용하는 것 외엔 위와 동일합니다.
+- SendRequestForTexture() : UnityWebRequest 객체를 받아서 통신 후 응답받은 이미지 데이터를 Texture2D 객체로 파싱하여 콜백합니다. 코루틴을 사용합니다.
+- SendRequestForTextureAsync() : async/await를 사용하는 것 외엔 위와 동일합니다.
 
-## Tech Stack
+## Used Library
 * UnityWebRequest
 * Unity Coroutine
 * Unity JsonUtility
@@ -118,13 +122,17 @@ httpClient.SendRequestForTexture(request, success => {
 
 ## Sample
 ### GET JSON Array 씬
-BuildGET() + GetJson<T>()<br>
+GET request + JSON array response<br>
 웹 API에서 노래방 신곡 리스트를 받아와 UI에 표시하는 예제입니다.
 
 [API 정보](https://pureani.tistory.com/4997)
 
 ### GET Picture 씬
-BuildTexture() + GetTexture()<br>
+GET request + Texture2D response<br>
 이미지 사이트에서 특정 이미지를 받아와 UI에 표시하는 예제입니다.
 
 [예제 이미지](https://cdn.pixabay.com/photo/2023/05/05/11/07/sweet-7972193_1280.jpg)
+
+## References
+* [Coroutine code](https://www.youtube.com/watch?v=IbdTbvyaB4o)
+* [async / await code](https://github.com/Joseph-Cha/UnityWebRequestPractice)

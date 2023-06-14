@@ -4,7 +4,7 @@ using UnityEngine;
 namespace MaratangHttp
 {
 	[Serializable]
-	public class JsonArrayWrapper<T>
+	internal class JsonArrayWrapper<T>
 	{
 		[SerializeField] private T array;
 

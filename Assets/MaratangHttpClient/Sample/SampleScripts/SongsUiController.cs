@@ -21,8 +21,11 @@ public class SongsUiController : MonoBehaviour
         httpClient = MaratangHttpClient.GetInstance(this);
     }
 
+    // 1. Coroutine 사용
+    // SendRequestForJson()
     public void OnFetchButtonClicked()
     {
+        Debug.Log("Clicked");
         // GET 통신을 위한 request 객체 만들기
         UnityWebRequest request = new RequestBuilder(baseUrl)
             .AddPath(path)
@@ -41,11 +44,38 @@ public class SongsUiController : MonoBehaviour
             }
 
         }, failure => { 
-            Debug.Log(failure); 
+            Debug.Log(failure.Code); 
+            Debug.Log(failure.Message); 
         }, error => { 
             Debug.Log(error); 
         });
-    }
+	}
+
+    // 2. async / await 사용
+    // SendRequestForJsonAsync()
+    public void OnFetchAsyncButtonClicked()
+	{
+		Debug.Log("Clicked");
+		UnityWebRequest request = new RequestBuilder(baseUrl)
+			.AddPath(path)
+			.BuildGET();
+
+		httpClient.SendRequestForJsonAsync<Song[]>(request, success => {
+			Song[] downloadedSongs = success.Body;
+			UpdateUi(downloadedSongs);
+
+			foreach (KeyValuePair<string, string> kvp in success.Headers)
+			{
+				Debug.Log(kvp.Key + ": " + kvp.Value);
+			}
+
+		}, failure => {
+			Debug.Log(failure.Code);
+			Debug.Log(failure.Message);
+		}, error => {
+			Debug.Log(error);
+		});
+	}
 
     private void UpdateUi(Song[] newSongs)
     {
